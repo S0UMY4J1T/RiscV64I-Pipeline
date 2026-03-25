@@ -1,0 +1,44 @@
+module Data_Path #(
+    parameter ADDRESS_BUS_WIDTH = 5,
+    parameter DATA_BUS_WIDTH    = 32
+) (
+    input                         clk, reset, WE3, ALUSrc, PCSrc,
+    input  [1:0]                  ResultSrc, ImmSrc,
+    input  [2:0]                  ALUControl,
+    input  [DATA_BUS_WIDTH-1 : 0] Instr, RD_DataMem,
+    output                        Zero,
+    output [DATA_BUS_WIDTH-1 : 0] PC, ALUResult, WD_DataMem
+);
+
+    wire  [ADDRESS_BUS_WIDTH-1 : 0] A1, A2, A3;
+    wire  [DATA_BUS_WIDTH-1 : 0]    PCNext, PCPlus4, PCTarget, A, RD, WD3, RD1, RD2, ImmExt, SrcA, SrcB, ALUResult, WD;
+    wire ReadData ;
+
+
+    //PC Logic
+    Adder name1 (PC, 4, PCPlus4);
+    Mux2 name2 (PCSrc, PCPlus4, PCTarget, PCNext);
+    Adder name3 (PC, ImmExt, PCTarget);
+    Sync_Reset name4 (clk, reset, PCNext, PC);
+
+
+    //Register Logic
+    Register_File name3 (clk, WE3, A1, A2, A3, WD3, RD1, RD2);
+    assign A1     = Instr[19:15] ; 
+    assign A2     = Instr[24:20] ;
+    assign A3     = Instr[11:07] ;
+    Mux3 name5 (ResultSrc, ALUResult, RD_DataMem, PCPlus4, WD3);
+
+    //Extend Logic
+    Extend_Unit name6 (Instr, ImmSrc, ImmExt);
+    assign Imm    = Instr[31:20] ;
+
+    //ALU Logic
+    ALU name7 (SrcA, SrcB, Instr[12], Instr[30], ALUControl, Zero, ALUResult);
+    assign SrcA   = RD1 ;
+    Mux2 name8 (ALUSrc, RD2, ImmExt, SrcB);
+
+    //DataMem write Logic
+    assign WD_DataMem = RD2;  
+    
+endmodule

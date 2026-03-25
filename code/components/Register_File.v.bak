@@ -1,0 +1,20 @@
+module Register_File #(
+    parameter ADDRESS_BUS_WIDTH = 5,
+    parameter DATA_BUS_WIDTH    = 32,
+    parameter XLEN              = 32
+) (
+    input                            clk, WE3,
+    input  [ADDRESS_BUS_WIDTH-1 : 0] A1, A2, A3,
+    input  [DATA_BUS_WIDTH-1 : 0]    WD3,
+    output [DATA_BUS_WIDTH-1 : 0]    RD1 , RD2 
+);
+    reg [XLEN-1 : 0] Instruction_Mem [DATA_BUS_WIDTH-1 : 0] ;
+
+    assign RD1 <= Register_File[A1] ;
+    assign RD2 <= Register_File[A2] ;
+
+    always @(posedge clk ) begin
+        Register_File[A3] <= (WE3)? WD3 : Register_File[A3] ;
+    end
+    
+endmodule

@@ -1,0 +1,67 @@
+// data_mem.v - data memory
+
+module data_mem #(
+    parameter DATA_WIDTH = 32,
+    parameter ADDR_WIDTH = 32,
+    parameter MEM_SIZE   = 64
+)(
+    input                       clk,
+    input                       WE,
+    input       [2:0]           funct3,
+    input       [ADDR_WIDTH-1:0] A_ByteAddressable,
+    input       [DATA_WIDTH-1:0] WD,
+    output reg  [DATA_WIDTH-1:0] RD
+);
+
+    reg [DATA_WIDTH-1:0] data_ram [0:MEM_SIZE-1];
+
+    wire [$clog2(MEM_SIZE)-1:0] A_WordAddressable;
+    reg  [7:0]  lb_bits, sb_bits;
+    reg  [15:0] lh_bits, sh_bits;
+
+    assign A_WordAddressable = A_ByteAddressable[$clog2(MEM_SIZE)+1 : 2];
+
+    // Read logic
+    always @(*) begin
+        case (A_ByteAddressable[1:0])
+                    2'b00: lb_bits = data_ram[A_WordAddressable][ 7: 0];
+                    2'b01: lb_bits = data_ram[A_WordAddressable][15: 8];
+                    2'b10: lb_bits = data_ram[A_WordAddressable][23:16];
+                    2'b11: lb_bits = data_ram[A_WordAddressable][31:24];
+        endcase
+
+        lh_bits = (A_ByteAddressable[1]) ? data_ram[A_WordAddressable][31:16] : data_ram[A_WordAddressable][15:0];
+
+        case (funct3)
+            3'b000: RD = {{24{lb_bits[7]}}, lb_bits};   // lb
+            3'b001: RD = {{16{lh_bits[15]}}, lh_bits};  // lh
+            3'b010: RD = data_ram[A_WordAddressable];   // lw
+            3'b100: RD = {24'b0, lb_bits};              // lbu
+            3'b101: RD = {16'b0, lh_bits};              // lhu
+        endcase
+    end
+
+    // Write logic
+    always @(posedge clk ) begin
+        if (WE) begin
+            case (funct3)
+                3'b000: begin
+                    case (A_ByteAddressable[1:0])
+                        2'b00: data_ram[A_WordAddressable][7:0] <= WD[7:0];
+                        2'b01: data_ram[A_WordAddressable][15:8] <= WD[7:0];
+                        2'b10: data_ram[A_WordAddressable][23:16] <= WD[7:0];
+                        2'b11: data_ram[A_WordAddressable][31:24] <= WD[7:0];
+                    endcase
+                end
+                3'b001: begin 
+                      if (A_ByteAddressable[1]) data_ram[A_WordAddressable][31:16] <= WD[15:0];
+                      else data_ram[ A_WordAddressable][15:0] <= WD[15:0];  
+                end
+                3'b010: data_ram[A_WordAddressable] <= WD ;
+            endcase
+        end 
+    end
+
+endmodule
+
+

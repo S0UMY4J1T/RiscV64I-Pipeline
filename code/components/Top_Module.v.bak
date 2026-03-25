@@ -1,0 +1,25 @@
+module Top_Module #(
+    parameter ADDRESS_BUS_WIDTH = 32,
+    parameter DATA_BUS_WIDTH    = 32
+) (
+    input                         clk, reset,
+    input                         Ext_MemWrite,
+    input  [DATA_BUS_WIDTH-1 : 0] Ext_WriteData, Ext_DataAdr,
+    output                        WE,
+    output [DATA_BUS_WIDTH-1 : 0] WD_DataMem, A_DataMem, RD_DataMem,
+    output [DATA_BUS_WIDTH-1 : 0] PC, Result
+
+);
+    wire WE_rv32;
+    wire [DATA_BUS_WIDTH-1 : 0] Instr, WD_DataMem_rv32, ALUResult;
+
+    assign A_DataMem = reset ? Ext_DataAdr : ALUResult;
+    assign WD_DataMem = (Ext_MemWrite && reset) ? Ext_WriteData : WD_DataMem_rv32 ;
+    assign WE  = (Ext_MemWrite && reset) ? 1 : WE_rv32;
+
+
+    RiscV_CPU name1 (clk, reset, Instr, RD_DataMem, WE_rv32, PC, Result, ALUResult, WD_DataMem_rv32);
+    instr_mem name2 (PC, Instr);
+    data_mem name3 (clk, WE, Instr[14:12], A_DataMem, WD_DataMem, RD_DataMem);
+    
+endmodule
