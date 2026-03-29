@@ -8,11 +8,11 @@ module Register_File #(
     input  [DATA_BUS_WIDTH-1 : 0]    WD3,
     output [DATA_BUS_WIDTH-1 : 0]    RD1 , RD2 
 );
-    reg [XLEN-1 : 0] register_file [DATA_BUS_WIDTH-1 : 0] ;
+    reg [DATA_BUS_WIDTH-1 : 0] register_file [XLEN-1 : 0] ;
 
     integer i;
     initial begin
-        for (i = 0; i < 64; i = i + 1) begin
+        for (i = 0; i < 32; i = i + 1) begin
             register_file[i] = 0;
         end
     end
@@ -20,7 +20,7 @@ module Register_File #(
     assign RD1 = (A1 == 0) ? 64'd0 : register_file[A1] ;
     assign RD2 = (A2 == 0) ? 64'd0 : register_file[A2] ;
 
-    always @(posedge clk) begin
+    always @(negedge clk) begin
         if (A3 == 0) register_file[A3] <= 64'b0;
         else register_file[A3] <= (WE3)? WD3 : register_file[A3] ;
     end
