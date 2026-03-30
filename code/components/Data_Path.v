@@ -4,12 +4,12 @@ module Data_Path #(
     parameter DATA_BUS_WIDTH    = 64
 ) (
     input                         clk, reset, RegWriteM, RegWriteW, ALUSrcA, ALUSrcBE, UseRs1, UseRs2, JALR, PCSrc,
-    input  [1:0]                  ResultSrcE, ResultSrcW,
+    input  [1:0]                  ResultSrcE, ResultSrcM,
     input  [2:0]                  ImmSrc, ALUControl,
     input  [INSTR_WIDTH-1 : 0]    InstrF,
     input  [DATA_BUS_WIDTH-1 : 0] RD_DataMemM,
     output                        Condition, StallD, FlushD, FlushE,
-    output [DATA_BUS_WIDTH-1 : 0] PCF, PCD, PCE, PCM, PCW, Result, ALUResultM, WD_DataMem,
+    output [DATA_BUS_WIDTH-1 : 0] PCF, PCD, PCE, PCM, PCW, ResultW, ALUResultM, WD_DataMem,
     output [INSTR_WIDTH-1 : 0]    InstrM
 );
 
@@ -22,7 +22,7 @@ module Data_Path #(
                                    ImmExtD, ImmExtE, ImmExtM, ImmExtW,
                                    PCPlus4F, PCPlus4D, PCPlus4E, PCPlus4M, PCPlus4W,
                                    PCPlusImmE, PCNextF, PCTargetE,
-                                   ALUResultE, ALUResultW, RD_DataMemW;
+                                   ALUResultE, ALUResultW, RD_DataMemW, ResultM;
 
 
     // Non Arch Registers
@@ -54,6 +54,7 @@ module Data_Path #(
     NonArch_Reg name28 (clk, 1'b1, reset, ImmExtM, ImmExtW);
     NonArch_Reg name30 (clk, 1'b1, reset, PCM, PCW);
     NonArch_Reg#(REG_ADR_BUS_WIDTH) name32 (clk, 1'b1, reset, A3M, A3W);
+    NonArch_Reg name41 (clk, 1'b1, reset, ResultM, ResultW);
     
 
     //PC Logic
@@ -69,8 +70,8 @@ module Data_Path #(
     assign A2D = InstrD[24:20] ;
     assign A3D = InstrD[11:7] ;
     Register_File name5 (clk, RegWriteW, A1D, A2D, A3W, WD3, RD1D, RD2D);
-    Mux4 name6 (ResultSrcW, ALUResultW, RD_DataMemW, PCPlus4W, ImmExtW, Result);
-    assign WD3  = Result;
+    Mux4 name6 (ResultSrcM, ALUResultM, RD_DataMemM, PCPlus4M, ImmExtM, ResultM);
+    assign WD3  = ResultW;
 
     //Extend Logic
     Extend_Unit name7 (InstrD, ImmSrc, ImmExtD);
@@ -87,8 +88,8 @@ module Data_Path #(
     //Hazard Unit
 
     // Forwarding
-    Mux3 name36 (ForwardAE, RD1E, ALUResultM, Result, RD1E_Fwd);
-    Mux3 name37 (ForwardBE, RD2E, ALUResultM, Result, RD2E_Fwd);
+    Mux3 name36 (ForwardAE, RD1E, ResultM, ResultW, RD1E_Fwd); 
+    Mux3 name37 (ForwardBE, RD2E, ResultM, ResultW, RD2E_Fwd);
     Forwarding_Unit name38 (A1E, A2E, A3M, A3W, RegWriteM, RegWriteW, ForwardAE, ForwardBE); 
 
     // Stalling and Flushing

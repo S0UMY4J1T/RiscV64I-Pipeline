@@ -4,7 +4,7 @@ module Forwarding_Unit #(
 ) (
     input [REG_ADR_BUS_WIDTH-1 : 0] A1E, A2E, RdM, RdW,
     input                           RegW_M, RegW_W,
-    output reg  [1:0]              ForwardAE, ForwardBE
+    output reg  [1:0]               ForwardAE, ForwardBE
 );
 
     always @(*) begin

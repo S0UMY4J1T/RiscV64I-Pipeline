@@ -45,17 +45,17 @@ module ALU #(
             case (ALUControl)
                 ADD : ALUResult32 = A32 + B32  ; 
                 SUB : ALUResult32 = A32 + ~B32 + 1 ;
-                AND : ALUResult32 = A32 & B32 ;
-                OR  : ALUResult32 = A32 | B32 ;
-                XOR : ALUResult32 = A32 ^ B32 ;
+                // AND : ALUResult32 = A32 & B32 ;
+                // OR  : ALUResult32 = A32 | B32 ;
+                // XOR : ALUResult32 = A32 ^ B32 ;
                 SLL : ALUResult32 = A32 << B32[4:0] ;
-                SLT : begin
-                    if (funct3[0]) ALUResult32 = (A32 < B32);  //SLTU
-                    else begin                                 //SLT
-                        if (A32[31] == B32[31]) ALUResult32 = (A32 < B32);
-                        else ALUResult32 = A32[31];
-                    end 
-                end
+                // SLT : begin
+                //     if (funct3[0]) ALUResult32 = (A32 < B32);  //SLTU
+                //     else begin                                 //SLT
+                //         if (A32[31] == B32[31]) ALUResult32 = (A32 < B32);
+                //         else ALUResult32 = A32[31];
+                //     end 
+                // end
                 SR  : begin   
                     if (funct7b5) ALUResult32 =  $signed(A32) >>> B32[4:0] ;       //SRA
                     else ALUResult32 = A32 >> B32[4:0] ;                    //SRL

@@ -4,13 +4,13 @@ module Control_Path (
     input  [2:0]                   funct3F,
     input  [6:0]                   opcodeF,
     output                         RegWriteM, RegWriteW, MemWriteM, ALUSrcAE, ALUSrcBE, UseRs1D, UseRs2D, JALRE, PCSrcE,
-    output [1:0]                   ResultSrcE, ResultSrcW, 
+    output [1:0]                   ResultSrcE, ResultSrcM, 
     output [2:0]                   ImmSrcD, ALUControlE
 );
 
     wire [6:0] opcodeD;
     wire [2:0] funct3D, ALUControlD;
-    wire [1:0] ResultSrcD, ResultSrcM, ALUOpD;
+    wire [1:0] ResultSrcD, ALUOpD;
     wire funct7b5D, RegWriteD, RegWriteE, MemWriteD, MemWriteE, ALUSrcAD, ALUSrcBD,
          JALRD, BranchD, BranchE, JumpD, JumpE;
 
@@ -36,7 +36,6 @@ module Control_Path (
     NonArch_Reg#(2) name17 (clk, 1'b1, reset, ResultSrcE, ResultSrcM);
 
     NonArch_Reg#(1) name18 (clk, 1'b1, reset, RegWriteM, RegWriteW);
-    NonArch_Reg#(2) name19 (clk, 1'b1, reset, ResultSrcM, ResultSrcW);
 
     // Decoders
     Main_Controller name1 (opcodeD, RegWriteD, MemWriteD, ALUSrcAD, ALUSrcBD, UseRs1D, UseRs2D, JALRD, BranchD, JumpD, ResultSrcD, ALUOpD, ImmSrcD);
